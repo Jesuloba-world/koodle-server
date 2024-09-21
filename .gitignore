@@ -1,0 +1,8 @@
+/tmp
+*.env
+.env
+coverage.out
+
+/local/pgadmin_data
+/local/postgres_data
+/local/keydb_data
