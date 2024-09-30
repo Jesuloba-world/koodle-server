@@ -7,6 +7,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
+
 )
 
 var Validate *validator.Validate
@@ -24,33 +25,34 @@ func init() {
 	Validate.RegisterValidation("password", func(f1 validator.FieldLevel) bool {
 		password := f1.Field().String()
 
-		// RULE: at least one uppercase char, one lowercase char, one number and one special char
+		// RULE: a mix of letters, numbers and symbols
 		var (
-			hasUppercase bool
-			hasLowercase bool
-			hasNumber    bool
-			hasSpecial   bool
+			hasLetter bool
+			hasNumber bool
+			hasSymbol bool
 		)
 
 		for _, char := range password {
 			switch {
-			case unicode.IsUpper(char):
-				hasUppercase = true
-			case unicode.IsLower(char):
-				hasLowercase = true
+			case unicode.IsLetter(char):
+				hasLetter = true
 			case unicode.IsDigit(char):
 				hasNumber = true
 			case unicode.IsPunct(char) || unicode.IsSymbol(char):
-				hasSpecial = true
+				hasSymbol = true
+			}
+
+			if hasLetter && hasNumber && hasSymbol {
+				return true
 			}
 		}
 
-		return hasUppercase && hasLowercase && hasNumber && hasSpecial
+		return hasLetter && hasNumber && hasSymbol
 	})
 
 	// custom error message for password
 	Validate.RegisterTranslation("password", Translator, func(ut ut.Translator) error {
-		return ut.Add("password", "{0} must contain at least one uppercase letter, one lowercase letter, one number and one special character", true)
+		return ut.Add("password", "{0} must contain a mix of letters, numbers, and symbols", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("password", fe.Field())
 		return t

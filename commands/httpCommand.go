@@ -18,8 +18,8 @@ import (
 	authservice "github.com/Jesuloba-world/koodle-server/services/authService"
 	otpservice "github.com/Jesuloba-world/koodle-server/services/otpService"
 	senderservice "github.com/Jesuloba-world/koodle-server/services/senderService"
+	tokenservice "github.com/Jesuloba-world/koodle-server/services/tokenService"
 	"github.com/Jesuloba-world/koodle-server/util"
-
 )
 
 func HttpCommand(db *bun.DB) *cli.Command {
@@ -58,11 +58,15 @@ func startHttpServer(db *bun.DB) error {
 	senderService := senderservice.NewSenderService(config.MsKey, "needle@trial-pr9084z2ev84w63d.mlsender.net", userrepo)
 
 	otpExpirationDuration := time.Minute * 30 // 30 minutes
-	otpGenerateTimeLapse := time.Minute * 5   // 5 minutes
+	otpGenerateTimeLapse := time.Minute * 1   // 1 minutes
 
 	otpService := otpservice.NewOTPService(db, otpExpirationDuration, otpGenerateTimeLapse, senderService)
 
-	authService := authservice.NewAuthService(api, db, otpService, userrepo)
+	accessTokenTTL := 1 * time.Hour       // 1 hour
+	refreshTokenTTL := 7 * 24 * time.Hour // 1 week
+	tokenservice := tokenservice.NewTokenService(config.SecretKey, accessTokenTTL, refreshTokenTTL, db)
+
+	authService := authservice.NewAuthService(api, db, otpService, userrepo, tokenservice)
 	authService.RegisterRoutes()
 
 	slog.Info("Server starting", "port", port)

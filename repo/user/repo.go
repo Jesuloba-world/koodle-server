@@ -9,6 +9,7 @@ import (
 	"github.com/uptrace/bun"
 
 	"github.com/Jesuloba-world/koodle-server/model"
+
 )
 
 type UserRepo struct {
@@ -82,4 +83,20 @@ func (s *UserRepo) FindByID(ctx context.Context, id string) (*model.User, error)
 	}
 
 	return user, nil
+}
+
+func (s *UserRepo) UpdateUser(ctx context.Context, user *model.User) error {
+	_, err := s.db.NewUpdate().
+		Model(user).
+		WherePK().
+		Exec(ctx)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("user not found")
+		}
+		return fmt.Errorf("error updating user: %w", err)
+	}
+
+	return nil
 }
