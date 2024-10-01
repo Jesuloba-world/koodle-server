@@ -31,4 +31,10 @@ func (s *AuthService) RegisterRoutes() {
 	humagroup.Post(s.api, "/resendemailverificationotp", s.resendEmailVerificationOTP, "Resend email verification OTP")
 	humagroup.Post(s.api, "/verifyemail", s.verifyEmail, "Verify email address with OTP")
 	humagroup.Post(s.api, "/setPassword", s.setPassword, "Set Password for user")
+	humagroup.Post(s.api, "/login", s.login, "Login user")
+	humagroup.Post(s.api, "/refreshtoken", s.refreshToken, "Refresh token")
+	humagroup.Post(s.api, "/startresetpassword", s.startResetPassword, "Start Reset Password")
+	humagroup.Post(s.api, "/resendresetpasswordotp", s.resendResetPasswordOTP, "Resend reset password OTP")
+	humagroup.Post(s.api, "/verifyresetpasswordotp", s.verifyResetPasswordOTP, "Verify reset password OTP")
+	humagroup.Post(s.api, "/resetpassword", s.resetPassword, "Reset password")
 }

@@ -128,13 +128,17 @@ func (s *AuthService) setPassword(ctx context.Context, req *setPasswordReq) (*se
 		return nil, huma.Error404NotFound("user not found", err)
 	}
 
-	isValid, err := s.otp.VerifyOTP(model.OTPPurposeEmailVerification, model.OTPChannelEmail, user.ID, req.Body.OTP, false)
+	isValid, err := s.otp.VerifyOTP(model.OTPPurposeEmailVerification, model.OTPChannelEmail, user.ID, req.Body.OTP, true)
 	if err != nil {
 		return nil, err
 	}
 
 	if !isValid {
 		return nil, huma.Error403Forbidden("Invalid OTP", errors.New("the provided OTP is incorrect or has expired"))
+	}
+
+	if user.Password != "" {
+		return nil, huma.Error400BadRequest("Password already set", errors.New("user already has a password set, login instead"))
 	}
 
 	err = user.SetPassword(req.Body.Password)
@@ -154,7 +158,7 @@ func (s *AuthService) setPassword(ctx context.Context, req *setPasswordReq) (*se
 
 	resp := &setPasswordResp{}
 	resp.Body.Message = "User signup completed"
-	resp.Body.User = *user
+	resp.Body.User = user
 	resp.Body.AccessToken = access
 	resp.Body.RefreshToken = refresh
 	return resp, nil
