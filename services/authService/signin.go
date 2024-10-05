@@ -2,6 +2,7 @@ package authservice
 
 import (
 	"context"
+	"errors"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -9,11 +10,11 @@ import (
 func (s *AuthService) login(ctx context.Context, req *loginReq) (*loginResp, error) {
 	user, err := s.userRepo.FindByEmail(ctx, req.Body.Email)
 	if err != nil {
-		return nil, huma.Error404NotFound("user not found", err)
+		return nil, huma.Error404NotFound("Invalid email or password", err)
 	}
 
 	if !user.CheckPassword(req.Body.Password) {
-		return nil, huma.Error401Unauthorized("Invalid email or password")
+		return nil, huma.Error401Unauthorized("Invalid email or password", errors.New("invalid email or password"))
 	}
 
 	access, refresh, err := s.token.GenerateTokens(user.ID)
