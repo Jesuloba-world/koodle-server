@@ -8,14 +8,16 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/uptrace/bun"
 	"github.com/urfave/cli/v2"
 
+	custommiddleware "github.com/Jesuloba-world/koodle-server/middleware"
 	userrepo "github.com/Jesuloba-world/koodle-server/repo/user"
 	authservice "github.com/Jesuloba-world/koodle-server/services/authService"
+	boardservice "github.com/Jesuloba-world/koodle-server/services/boardService"
 	otpservice "github.com/Jesuloba-world/koodle-server/services/otpService"
 	senderservice "github.com/Jesuloba-world/koodle-server/services/senderService"
 	tokenservice "github.com/Jesuloba-world/koodle-server/services/tokenService"
@@ -68,6 +70,11 @@ func startHttpServer(db *bun.DB) error {
 
 	authService := authservice.NewAuthService(api, db, otpService, userrepo, tokenservice)
 	authService.RegisterRoutes()
+
+	middleware := custommiddleware.MakeMiddleware(api, tokenservice)
+
+	boardservice := boardservice.NewBoardService(api, middleware, userrepo)
+	boardservice.RegisterRoutes()
 
 	slog.Info("Server starting", "port", port)
 	err = http.ListenAndServe(":"+port, router)

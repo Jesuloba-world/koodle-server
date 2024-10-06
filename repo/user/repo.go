@@ -8,8 +8,8 @@ import (
 
 	"github.com/uptrace/bun"
 
+	custommiddleware "github.com/Jesuloba-world/koodle-server/middleware"
 	"github.com/Jesuloba-world/koodle-server/model"
-
 )
 
 type UserRepo struct {
@@ -99,4 +99,18 @@ func (s *UserRepo) UpdateUser(ctx context.Context, user *model.User) error {
 	}
 
 	return nil
+}
+
+func (s *UserRepo) GetUserByCtx(ctx context.Context) (*model.User, error) {
+	userId, ok := ctx.Value("user_id").(string)
+	if !ok {
+		return nil, custommiddleware.ErrInvalidID
+	}
+
+	user, err := s.FindByID(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
