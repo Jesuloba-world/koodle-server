@@ -57,7 +57,7 @@ func startHttpServer(db *bun.DB) error {
 
 	userrepo := userrepo.NewUserRepo(db)
 
-	senderService := senderservice.NewSenderService(config.MsKey, "needle@trial-pr9084z2ev84w63d.mlsender.net", userrepo)
+	senderService := senderservice.NewSenderService(config.SMTPPort, config.SMTPHost, config.SMTPUser, config.SMTPPass, config.EmailSender, userrepo)
 
 	otpExpirationDuration := time.Minute * 30 // 30 minutes
 	otpGenerateTimeLapse := time.Minute * 1   // 1 minutes

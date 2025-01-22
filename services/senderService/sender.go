@@ -10,50 +10,40 @@ import (
 	"time"
 
 	"github.com/k3a/html2text"
-	"github.com/mailersend/mailersend-go"
+	"gopkg.in/mail.v2"
 
 	"github.com/Jesuloba-world/koodle-server/model"
 	userRepo "github.com/Jesuloba-world/koodle-server/repo/user"
 )
 
 type SenderService struct {
-	client   *mailersend.Mailersend
+	dialer   *mail.Dialer
 	sender   string
 	userRepo *userRepo.UserRepo
 }
 
-func NewSenderService(apiKey, sender string, userRepo *userRepo.UserRepo) *SenderService {
-	client := mailersend.NewMailersend(apiKey)
+func NewSenderService(smtpPort int, smtpHost, smtpUsername, smtpPassword, sender string, userRepo *userRepo.UserRepo) *SenderService {
+	dialer := mail.NewDialer(smtpHost, smtpPort, smtpUsername, smtpPassword)
+	dialer.SSL = false
+
 	return &SenderService{
-		client:   client,
+		dialer:   dialer,
 		sender:   sender,
 		userRepo: userRepo,
 	}
 }
 
 func (e *SenderService) sendEmail(to, subject, htmlBody string) error {
+	m := mail.NewMessage()
+	m.SetHeader("From", e.sender)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+
 	plainTextBody := html2text.HTML2Text(htmlBody)
+	m.SetBody("text/plain", plainTextBody)
+	m.AddAlternative("text/html", htmlBody)
 
-	recipients := []mailersend.Recipient{
-		{
-			Email: to,
-			Name:  "Recipient",
-		},
-	}
-
-	from := mailersend.From{
-		Email: e.sender,
-		Name:  "Koodle",
-	}
-
-	message := e.client.Email.NewMessage()
-	message.SetFrom(from)
-	message.SetRecipients(recipients)
-	message.SetHTML(htmlBody)
-	message.SetText(plainTextBody)
-	message.SetSubject(subject)
-
-	_, err := e.client.Email.Send(context.Background(), message)
+	err := e.dialer.DialAndSend(m)
 
 	if err != nil {
 		return fmt.Errorf("failed to send email: %w", err)

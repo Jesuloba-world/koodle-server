@@ -5,18 +5,24 @@ import (
 	"sync"
 
 	"github.com/spf13/viper"
+
 )
 
 type Config struct {
-	PGUser      string `mapstructure:"PGUSER"`
-	PGPassword  string `mapstructure:"PGPASSWORD"`
-	PGHost      string `mapstructure:"PGHOST"`
-	PGPort      string `mapstructure:"PGPORT"`
-	PGDB        string `mapstructure:"PGDATABASE"`
+	// PGUser      string `mapstructure:"PGUSER"`
+	// PGPassword  string `mapstructure:"PGPASSWORD"`
+	// PGHost      string `mapstructure:"PGHOST"`
+	// PGPort      string `mapstructure:"PGPORT"`
+	// PGDB        string `mapstructure:"PGDATABASE"`
 	SecretKey   string `mapstructure:"SECRET_KEY"`
 	DatabaseUrl string `mapstructure:"DATABASE_URL"`
-	BrevoKey    string `mapstructure:"BREVO_API_KEY"`
-	MsKey       string `mapstructure:"MAILERSEND_API_KEY"`
+
+	// SMTP Configuration
+	SMTPHost    string `mapstructure:"SMTP_HOST"`
+	SMTPPort    int    `mapstructure:"SMTP_PORT"`
+	SMTPUser    string `mapstructure:"SMTP_USER"`
+	SMTPPass    string `mapstructure:"SMTP_PASS"`
+	EmailSender string `mapstructure:"EMAIL_SENDER"`
 }
 
 var (
@@ -43,14 +49,18 @@ func loadConfig() (Config, error) {
 			}
 		}
 
-		viper.BindEnv("PGUSER")
-		viper.BindEnv("PGPASSWORD")
-		viper.BindEnv("PGHOST")
-		viper.BindEnv("PGPORT")
-		viper.BindEnv("PGDATABASE")
+		// viper.BindEnv("PGUSER")
+		// viper.BindEnv("PGPASSWORD")
+		// viper.BindEnv("PGHOST")
+		// viper.BindEnv("PGPORT")
+		// viper.BindEnv("PGDATABASE")
 		viper.BindEnv("SECRET_KEY")
 		viper.BindEnv("BREVO_API_KEY")
-		viper.BindEnv("MAILERSEND_API_KEY")
+		viper.BindEnv("SMTP_HOST")
+		viper.BindEnv("SMTP_PORT")
+		viper.BindEnv("SMTP_USER")
+		viper.BindEnv("SMTP_PASS")
+		viper.BindEnv("EMAIL_SENDER")
 
 		err = viper.Unmarshal(&config)
 		if err == nil {
