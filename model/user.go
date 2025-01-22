@@ -20,6 +20,8 @@ type User struct {
 	Password      string    `bun:"password,notnull" json:"-"`
 	CreatedAt     time.Time `bun:"created_at,nullzero,default:current_timestamp"`
 	UpdatedAt     time.Time `bun:"updated_at,nullzero,default:current_timestamp"`
+
+	Boards []Board `bun:"rel:has-many,join:id=user_id"`
 }
 
 func (u *User) SetTimestamps() {
@@ -59,4 +61,22 @@ func (u *User) BeforeAppendModel(ctx context.Context, query bun.Query) error {
 	u.SetTimestamps()
 	u.SetId()
 	return nil
+}
+
+type UserResponse struct {
+	ID            string    `json:"id" example:"136789874673893" doc:"ID of user"`
+	Email         string    `json:"email" example:"user@example.com" doc:"Email address of user"`
+	EmailVerified bool      `json:"email_verified" example:"true" doc:"Whether user's email is verified"`
+	CreatedAt     time.Time `json:"created_at" doc:"Time user was created"`
+	UpdatedAt     time.Time `json:"updated_at" doc:"Time user was last updated"`
+}
+
+func (u *User) MapUserToResponse() *UserResponse {
+	return &UserResponse{
+		ID:            u.ID,
+		Email:         u.Email,
+		EmailVerified: u.EmailVerified,
+		CreatedAt:     u.CreatedAt,
+		UpdatedAt:     u.UpdatedAt,
+	}
 }

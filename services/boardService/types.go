@@ -1,18 +1,8 @@
 package boardservice
 
 import (
-	"time"
-
 	"github.com/Jesuloba-world/koodle-server/model"
-
 )
-
-type boardObject struct {
-	ID        string    `json:"id" example:"136789874673893" doc:"ID of board"`
-	Name      string    `json:"name" example:"Web design" doc:"Name of board"`
-	CreatedAt time.Time `json:"createdAt" doc:"Time board was created"`
-	UpdatedAt time.Time `json:"updatedAt" doc:"Time board was last updated"`
-}
 
 type boardInput struct {
 	Name    string   `json:"name" example:"Web design" doc:"Name of board"`
@@ -27,8 +17,8 @@ type createBoardReq struct {
 
 type createBoardResp struct {
 	Body struct {
-		Message string       `json:"message" example:"Board created successfully"`
-		Board   *boardObject `json:"board" doc:"Created board"`
+		Message string             `json:"message" example:"Board created successfully"`
+		Board   *model.BoardObject `json:"board" doc:"Created board"`
 	}
 }
 
@@ -46,7 +36,7 @@ type getAllBoardsReq struct{}
 
 type getAllBoardsResp struct {
 	Body struct {
-		Boards []*boardObject `json:"boards" doc:"List of boards"`
+		Boards []*model.BoardObject `json:"boards" doc:"List of boards"`
 	}
 }
 
@@ -59,8 +49,8 @@ type updateBoardReq struct {
 
 type updateBoardResp struct {
 	Body struct {
-		Message string       `json:"message" example:"Board updated successfully"`
-		Board   *boardObject `json:"board" doc:"Updated board"`
+		Message string             `json:"message" example:"Board updated successfully"`
+		Board   *model.BoardObject `json:"board" doc:"Updated board"`
 	}
 }
 

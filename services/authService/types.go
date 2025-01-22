@@ -49,10 +49,10 @@ type setPasswordReq struct {
 
 type setPasswordResp struct {
 	Body struct {
-		Message      string      `json:"message" example:"Password set"`
-		User         *model.User `json:"user" doc:"the user object"`
-		AccessToken  string      `json:"accesstoken" doc:"the accesstoken for authentication"`
-		RefreshToken string      `json:"refreshtoken" doc:"the refreshtoken to refresh access"`
+		Message      string              `json:"message" example:"Password set"`
+		User         *model.UserResponse `json:"user" doc:"the user object"`
+		AccessToken  string              `json:"accesstoken" doc:"the accesstoken for authentication"`
+		RefreshToken string              `json:"refreshtoken" doc:"the refreshtoken to refresh access"`
 	}
 }
 
@@ -65,10 +65,10 @@ type loginReq struct {
 
 type loginResp struct {
 	Body struct {
-		Message      string      `json:"message" example:"login successful"`
-		User         *model.User `json:"user" doc:"the user object"`
-		AccessToken  string      `json:"accesstoken" doc:"the accesstoken for authentication"`
-		RefreshToken string      `json:"refreshtoken" doc:"the refreshtoken to refresh access"`
+		Message      string              `json:"message" example:"login successful"`
+		User         *model.UserResponse `json:"user" doc:"the user object"`
+		AccessToken  string              `json:"accesstoken" doc:"the accesstoken for authentication"`
+		RefreshToken string              `json:"refreshtoken" doc:"the refreshtoken to refresh access"`
 	}
 }
 

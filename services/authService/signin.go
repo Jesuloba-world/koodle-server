@@ -24,7 +24,7 @@ func (s *AuthService) login(ctx context.Context, req *loginReq) (*loginResp, err
 
 	resp := &loginResp{}
 	resp.Body.Message = "Login successful"
-	resp.Body.User = user
+	resp.Body.User = user.MapUserToResponse()
 	resp.Body.AccessToken = access
 	resp.Body.RefreshToken = refresh
 	return resp, nil

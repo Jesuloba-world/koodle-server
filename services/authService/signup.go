@@ -8,6 +8,7 @@ import (
 
 	"github.com/Jesuloba-world/koodle-server/lib/validator"
 	"github.com/Jesuloba-world/koodle-server/model"
+
 )
 
 func (s *AuthService) startSignUp(ctx context.Context, req *startSignUpReq) (*startSignUpResp, error) {
@@ -158,7 +159,7 @@ func (s *AuthService) setPassword(ctx context.Context, req *setPasswordReq) (*se
 
 	resp := &setPasswordResp{}
 	resp.Body.Message = "User signup completed"
-	resp.Body.User = user
+	resp.Body.User = user.MapUserToResponse()
 	resp.Body.AccessToken = access
 	resp.Body.RefreshToken = refresh
 	return resp, nil
