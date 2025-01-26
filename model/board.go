@@ -7,18 +7,19 @@ import (
 	"github.com/uptrace/bun"
 
 	"github.com/Jesuloba-world/koodle-server/util"
+
 )
 
 type Board struct {
 	bun.BaseModel `bun:"table:boards,alias:b"`
 
 	ID        string    `bun:"id,pk,type:char(21)" json:"id"`
-	UserId    string    `bun:"user_id,notnull,type:char(21)" json:"userId"`
+	UserId    string    `bun:"user_id,notnull,type:char(21)" json:"-"`
 	Name      string    `bun:"name,notnull" json:"name"`
 	CreatedAt time.Time `bun:"created_at,notnull,default:current_timestamp" json:"createdAt"`
 	UpdatedAt time.Time `bun:"updated_at,notnull,default:current_timestamp" json:"updatedAt"`
 
-	User    *User    `bun:"rel:belongs-to,join:user_id=id" json:"user"`
+	User    *User    `bun:"rel:belongs-to,join:user_id=id" json:"-"`
 	Columns []Column `bun:"rel:has-many,join:id=board_id" json:"columns"`
 }
 

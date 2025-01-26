@@ -22,11 +22,6 @@ func NewBoardRepo(db *bun.DB) *BoardRepo {
 	}
 }
 
-func (r *BoardRepo) CreateBoard(ctx context.Context, board *model.Board) error {
-	_, err := r.db.NewInsert().Model(board).Exec(ctx)
-	return err
-}
-
 func (r *BoardRepo) CreateBoardWithColumn(ctx context.Context, board *model.Board, columns []*model.Column) error {
 	return r.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewInsert().Model(board).Exec(ctx); err != nil {
@@ -46,10 +41,13 @@ func (r *BoardRepo) CreateBoardWithColumn(ctx context.Context, board *model.Boar
 	})
 }
 
-func (r *BoardRepo) GetBoardByID(ctx context.Context, id string) (*model.Board, error) {
+func (r *BoardRepo) GetBoardWithColumns(ctx context.Context, id string) (*model.Board, error) {
 	board := new(model.Board)
 	err := r.db.NewSelect().
 		Model(board).
+		Relation("Columns", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("position ASC")
+		}).
 		Where("id = ?", id).
 		Scan(ctx)
 
@@ -63,20 +61,67 @@ func (r *BoardRepo) GetBoardByID(ctx context.Context, id string) (*model.Board, 
 	return board, nil
 }
 
-func (r *BoardRepo) UpdateBoard(ctx context.Context, board *model.Board) error {
-	_, err := r.db.NewUpdate().
-		Model(board).
-		WherePK().
-		Exec(ctx)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return ErrBoardNotFound
+func (r *BoardRepo) UpdateBoardWithColumns(ctx context.Context, board *model.Board, columns []*model.Column, columnsToDelete []string) error {
+	return r.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		// update board
+		_, err := tx.NewUpdate().
+			Model(board).
+			WherePK().
+			Exec(ctx)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return ErrBoardNotFound
+			}
+			return fmt.Errorf("failed to update board: %w", err)
 		}
-		return fmt.Errorf("failed to update board: %w", err)
-	}
 
-	return nil
+		// delete removed columns if any
+		if len(columnsToDelete) > 0 {
+			_, err = tx.NewDelete().
+				Model((*model.Column)(nil)).
+				Where("id IN (?)", bun.In(columnsToDelete)).
+				Exec(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to delete columns: %w", err)
+			}
+		}
+
+		// seperate new and existing columns
+		var newColumns []*model.Column
+		var existingColumns []*model.Column
+		for _, col := range columns {
+			if col.ID == "" {
+				newColumns = append(newColumns, col)
+			} else {
+				existingColumns = append(existingColumns, col)
+			}
+		}
+
+		// insert the new columns if any
+		if len(newColumns) > 0 {
+			_, err = tx.NewInsert().
+				Model(&newColumns).
+				Exec(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to create columns: %w", err)
+			}
+		}
+
+		// update existing columns if any
+		if len(existingColumns) > 0 {
+			_, err = tx.NewUpdate().
+				Model(&existingColumns).
+				Column("name", "position").
+				Bulk().
+				WherePK().
+				Exec(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to update existing columns: %w", err)
+			}
+		}
+
+		return nil
+	})
 }
 
 func (r *BoardRepo) DeleteBoard(ctx context.Context, id string) error {

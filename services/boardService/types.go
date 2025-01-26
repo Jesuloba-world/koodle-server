@@ -4,9 +4,14 @@ import (
 	"github.com/Jesuloba-world/koodle-server/model"
 )
 
+type columnInput struct {
+	ID   string `json:"id,omitempty" example:"col_123" doc:"ID of column (empty for new columns)"`
+	Name string `json:"name" example:"In Progress" doc:"Name of column"`
+}
+
 type boardInput struct {
-	Name    string   `json:"name" example:"Web design" doc:"Name of board"`
-	Columns []string `json:"columns" example:"To Do,In Progress,Done" doc:"Columns of board"`
+	Name    string        `json:"name" example:"Web design" doc:"Name of board"`
+	Columns []columnInput `json:"columns" doc:"Columns of board"`
 }
 
 type createBoardReq struct {

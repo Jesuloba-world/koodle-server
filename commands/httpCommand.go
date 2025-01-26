@@ -66,7 +66,8 @@ func startHttpServer(db *bun.DB) error {
 
 	otpService := otpservice.NewOTPService(db, otpExpirationDuration, otpGenerateTimeLapse, senderService)
 
-	accessTokenTTL := 1 * time.Hour       // 1 hour
+	accessTokenTTL := 1 * time.Hour // 1 hour
+	// accessTokenTTL := 5 * time.Minute     // 5 minutes
 	refreshTokenTTL := 7 * 24 * time.Hour // 1 week
 	tokenservice := tokenservice.NewTokenService(config.SecretKey, accessTokenTTL, refreshTokenTTL, db)
 
