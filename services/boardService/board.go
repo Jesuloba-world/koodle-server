@@ -158,7 +158,13 @@ func (s *BoardService) updateBoard(ctx context.Context, req *updateBoardReq) (*u
 }
 
 func (s *BoardService) deleteBoard(ctx context.Context, req *deleteBoardReq) (*deleteBoardResp, error) {
+	err := s.boardRepo.DeleteBoard(ctx, req.BoardId)
+	if err != nil {
+		return nil, huma.Error500InternalServerError("failed to delete board", err)
+	}
+
 	resp := &deleteBoardResp{}
+	resp.Body.Message = "Board deleted successfully"
 	return resp, nil
 }
 
