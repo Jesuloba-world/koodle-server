@@ -41,13 +41,22 @@ func (r *BoardRepo) CreateBoardWithColumn(ctx context.Context, board *model.Boar
 	})
 }
 
-func (r *BoardRepo) GetBoardWithColumns(ctx context.Context, id string) (*model.Board, error) {
+func (r *BoardRepo) GetBoardWithColumns(ctx context.Context, id string, includeTasks bool) (*model.Board, error) {
 	board := new(model.Board)
-	err := r.db.NewSelect().
+	query := r.db.NewSelect().
 		Model(board).
 		Relation("Columns", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Order("position ASC")
+		})
+
+	if includeTasks {
+		query = query.Relation("Columns.Tasks", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.Order("position ASC")
 		}).
+			Relation("Columns.Tasks.Subtasks")
+	}
+
+	err := query.
 		Where("id = ?", id).
 		Scan(ctx)
 

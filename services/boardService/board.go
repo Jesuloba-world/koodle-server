@@ -72,7 +72,7 @@ func (s *BoardService) getBoard(ctx context.Context, req *getBoardReq) (*getBoar
 		return nil, huma.Error401Unauthorized("Unauthorized", err)
 	}
 
-	board, err := s.boardRepo.GetBoardWithColumns(ctx, req.BoardId)
+	board, err := s.boardRepo.GetBoardWithColumns(ctx, req.BoardId, req.IncludeTask)
 	if err != nil {
 		slog.Error("Failed to get board", "error", err, "boardId", req.BoardId)
 		return nil, huma.Error404NotFound("board not found", err)
@@ -94,7 +94,7 @@ func (s *BoardService) updateBoard(ctx context.Context, req *updateBoardReq) (*u
 		return nil, huma.Error401Unauthorized("Unauthorized", err)
 	}
 
-	board, err := s.boardRepo.GetBoardWithColumns(ctx, req.BoardId)
+	board, err := s.boardRepo.GetBoardWithColumns(ctx, req.BoardId, false)
 	if err != nil {
 		return nil, huma.Error404NotFound("board not found", err)
 	}
