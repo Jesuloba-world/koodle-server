@@ -16,11 +16,13 @@ import (
 
 	custommiddleware "github.com/Jesuloba-world/koodle-server/middleware"
 	boardrepo "github.com/Jesuloba-world/koodle-server/repo/board"
+	taskrepo "github.com/Jesuloba-world/koodle-server/repo/task"
 	userrepo "github.com/Jesuloba-world/koodle-server/repo/user"
 	authservice "github.com/Jesuloba-world/koodle-server/services/authService"
 	boardservice "github.com/Jesuloba-world/koodle-server/services/boardService"
 	otpservice "github.com/Jesuloba-world/koodle-server/services/otpService"
 	senderservice "github.com/Jesuloba-world/koodle-server/services/senderService"
+	taskservice "github.com/Jesuloba-world/koodle-server/services/taskService"
 	tokenservice "github.com/Jesuloba-world/koodle-server/services/tokenService"
 	"github.com/Jesuloba-world/koodle-server/util"
 )
@@ -58,6 +60,7 @@ func startHttpServer(db *bun.DB) error {
 
 	userrepo := userrepo.NewUserRepo(db)
 	boardrepo := boardrepo.NewBoardRepo(db)
+	taskrepo := taskrepo.NewTaskRepo(db)
 
 	senderService := senderservice.NewSenderService(config.SMTPPort, config.SMTPHost, config.SMTPUser, config.SMTPPass, config.EmailSender, userrepo)
 
@@ -78,6 +81,9 @@ func startHttpServer(db *bun.DB) error {
 
 	boardservice := boardservice.NewBoardService(api, middleware, userrepo, boardrepo)
 	boardservice.RegisterRoutes()
+
+	taskservice := taskservice.NewTaskService(api, middleware, userrepo, boardrepo, taskrepo)
+	taskservice.RegisterRoutes()
 
 	slog.Info("Server starting", "port", port)
 	err = http.ListenAndServe(":"+port, router)
